@@ -10,93 +10,57 @@ import UIKit
 
 class CalcViewController: UIViewController {
     
-    var command_querry = ["+": [Int](), "-": [Int](), "/": [Int](), "*": [Int]()]
+    var first_number: Double = 0
     var number = ""
-    var latest_command = ""
+    var command = ""
+    var pointIsPressed = false
     
     @IBOutlet weak var expressionLabel: UILabel!
     @IBOutlet weak var textLabel: UILabel!
     
     @IBAction func ClearEntry(_ sender: UIButton) {
         textLabel.text = ""
-        command_querry = ["+": [Int](), "-": [Int](), "/": [Int](), "*": [Int]()]
         number = ""
+        command = ""
+        first_number = 0
+        pointIsPressed = false
     }
     
-    @IBAction func One(_ sender: UIButton) {
-        number.append("1")
-        textLabel.text?.append("1")
-    }
-    @IBAction func Two(_ sender: UIButton) {
-        number.append("2")
-        textLabel.text?.append("2")
-    }
-    @IBAction func Three(_ sender: UIButton) {
-        number.append("3")
-        textLabel.text?.append("3")
-    }
-    @IBAction func Four(_ sender: UIButton) {
-        number.append("4")
-        textLabel.text?.append("4")
-    }
-    @IBAction func Five(_ sender: UIButton) {
-        number.append("5")
-        textLabel.text?.append("5")
-    }
-    @IBAction func Six(_ sender: UIButton) {
-        number.append("6")
-        textLabel.text?.append("6")
-    }
-    @IBAction func Seven(_ sender: UIButton) {
-        number.append("7")
-        textLabel.text?.append("7")
-    }
-    @IBAction func Eight(_ sender: UIButton) {
-        number.append("8")
-        textLabel.text?.append("8")
-    }
-    @IBAction func Nine(_ sender: UIButton) {
-        number.append("9")
-        textLabel.text?.append("9")
-    }
-    @IBAction func Plus(_ sender: UIButton) {
-        if !number.isEmpty {
-            textLabel.text?.append(" + ")
-            command_querry["+"]?.append(Int(number)!)
-            number = ""
-            latest_command = "+"
+    @IBAction func NumberIsPressed(_ sender: AnyObject) {
+        if pointIsPressed {
+            return
+        }
+        if let pressed_number: String = sender.currentTitle {
+            switch pressed_number {
+            case "-":
+                number = "-" + number
+            case ".":
+                number += "."
+                pointIsPressed = true
+            default:
+                number += pressed_number
+            }
+            textLabel.text?.append(pressed_number)
         }
     }
-    @IBAction func Minus(_ sender: UIButton) {
-        if !number.isEmpty {
-            textLabel.text?.append(" - ")
-            command_querry["-"]?.append(Int(number)!)
+    
+    @IBAction func OperatorButtonIsPressed(_ sender: UIButton) {
+        if first_number == 0 {
+            first_number = Double(number)!
             number = ""
-            latest_command = "-"
-        }
-    }
-    @IBAction func Multiply(_ sender: UIButton) {
-        if !number.isEmpty {
-            textLabel.text?.append(" * ")
-            command_querry["*"]?.append(Int(number)!)
-            number = ""
-            latest_command = "*"
-        }
-    }
-    @IBAction func Divide(_ sender: UIButton) {
-        if !number.isEmpty {
-            textLabel.text?.append(" / ")
-            command_querry["/"]?.append(Int(number)!)
-            number = ""
-            latest_command = "/"
+            pointIsPressed = false
+            
+            if let operator_: String = sender.currentTitle {
+                command = operator_
+                textLabel.text?.append(" \(operator_) ")
+            }
         }
     }
     
     
     @IBAction func EqualButtonPressed(_ sender: UIButton) {
-        if !latest_command.isEmpty {
-            command_querry[latest_command]?.append(Int(number)!)
-            let result: String = calculateExpression()
+        if !command.isEmpty {
+            let result: String = calculateExpression(operand1: first_number, operand2: Double(number)!, command: command)
             setExpression(value: result)
         }
     }
@@ -105,21 +69,19 @@ class CalcViewController: UIViewController {
         expressionLabel.text = value
     }
     
-    func calculateExpression() -> String {
-        var res = 0
-        if (command_querry["*"]?.count)! + (command_querry["/"]?.count)! > 0 {
-            res = 1
-            res = (command_querry["*"]?.reduce(res, *))!
-            res = (command_querry["/"]?.reduce(res, /))!
-            res = (command_querry["+"]?.reduce(res, +))!
-            res = (command_querry["-"]?.reduce(res, -))!
+    func calculateExpression(operand1: Double, operand2: Double, command: String) -> String {
+        switch command {
+            case "+":
+                return String((operand1 + operand2))
+            case "-":
+                return String((operand1 - operand2))
+            case "*":
+                return String((operand1 * operand2))
+            case "/":
+                return String((operand1 / operand2))
+            default:
+                return ""
         }
-        else {
-            res = (command_querry["+"]?.reduce(res, +))!
-            res = (command_querry["-"]?.reduce(res, -))!
-        }
-        
-        return String(res)
     }
 
 }
